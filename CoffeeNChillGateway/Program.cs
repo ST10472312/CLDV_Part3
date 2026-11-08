@@ -22,9 +22,9 @@ builder.Services.AddSingleton(new QueueServiceClient(
 
 builder.Services.AddHostedService<StorageInitializer>();
 
-// builder.Services.AddSingleton<IMenuService, MenuService>();         // enable in Step 7
-// builder.Services.AddSingleton<IOrderService, OrderService>();       // enable in Step 8
-// builder.Services.AddSingleton<IDocumentService, DocumentService>(); // enable in Step 9
+builder.Services.AddSingleton<IMenuService, MenuService>();        
+// builder.Services.AddSingleton<IOrderService, OrderService>();      
+// builder.Services.AddSingleton<IDocumentService, DocumentService>(); 
 
 // builder.Services.AddCoffeeAuth(builder.Configuration);              // Member 2
 
