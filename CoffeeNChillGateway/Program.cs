@@ -6,7 +6,7 @@ using CoffeeNChillGateway.Options;
 using CoffeeNChillGateway.Services;
 using CoffeeNChillGateway.Swagger;
 using Microsoft.AspNetCore.Identity;
-// using CoffeeNChillGateway.Auth;   // Member 2: uncomment when their PR is merged
+using CoffeeNChillGateway.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +26,7 @@ builder.Services.AddSingleton<IMenuService, MenuService>();
 // builder.Services.AddSingleton<IOrderService, OrderService>();      
 // builder.Services.AddSingleton<IDocumentService, DocumentService>(); 
 
-// builder.Services.AddCoffeeAuth(builder.Configuration);              // Member 2
+builder.Services.AddCoffeeAuth(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -44,7 +44,7 @@ app.UseSwaggerUI(c =>
     c.DocumentTitle = "CoffeeNChill Gateway";
 });
 
-// app.UseAuthentication();   // Member 2
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
