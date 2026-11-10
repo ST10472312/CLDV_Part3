@@ -7,3 +7,9 @@ obj/
 __azurite_db_*.json
 __blobstorage__/
 __queuestorage__/
+
+# Local development settings and secrets
+**/local.settings.json
+.env
+.env.*
+!.env.example
