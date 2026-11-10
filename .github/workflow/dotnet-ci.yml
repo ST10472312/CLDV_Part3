@@ -1,3 +1,5 @@
+# CoffeeNChill automated build and test pipeline
+
 name: CoffeeNChill CI/CD
 
 on:
