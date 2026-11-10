@@ -1,0 +1,66 @@
+
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: coffeenchill-azurite-prod
+    command: >
+      azurite
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+      --location /data
+      --debug /data/debug.log
+    volumes:
+      - azurite-data:/data
+    networks:
+      - coffeenet
+    restart: unless-stopped
+
+  functions:
+    image: ${DOCKERHUB_USER}/coffeenchill-functions:${FUNCTIONS_TAG:-v2.0}
+    container_name: coffeenchill-functions-prod
+    depends_on:
+      - azurite
+    environment:
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: "true"
+    ports:
+      - "127.0.0.1:7071:80"
+    networks:
+      - coffeenet
+    restart: unless-stopped
+
+  gateway:
+    image: ${DOCKERHUB_USER}/coffeenchill-gateway:${GATEWAY_TAG:-v3.0}
+    container_name: coffeenchill-gateway-prod
+    depends_on:
+      - azurite
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Storage__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      Storage__MenuTable: MenuItems
+      Storage__OrdersTable: Orders
+      Storage__UsersTable: Users
+      Storage__DocumentsContainer: staff-docs
+      Storage__OrderQueue: order-processing-queue
+      Jwt__Issuer: ${JWT_ISSUER:-CoffeeNChill.Gateway}
+      Jwt__Audience: ${JWT_AUDIENCE:-CoffeeNChill.Clients}
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in your .env file}
+      Jwt__ExpiryMinutes: 60
+      SeedAdmin__Email: ${SEED_ADMIN_EMAIL:?Set SEED_ADMIN_EMAIL in your .env file}
+      SeedAdmin__Password: ${SEED_ADMIN_PASSWORD:?Set SEED_ADMIN_PASSWORD in your .env file}
+      SeedAdmin__FullName: Canteen Admin
+    ports:
+      - "5000:8080"
+    networks:
+      - coffeenet
+    restart: unless-stopped
+
+networks:
+  coffeenet:
+    driver: bridge
+
+volumes:
+  azurite-data:
