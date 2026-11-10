@@ -504,3 +504,101 @@ Available at: <https://learning.postman.com/docs/tests-and-scripts/write-scripts
 Postman, 2026d. *Postman Sandbox API reference*. [Online]
 Available at: <https://learning.postman.com/docs/tests-and-scripts/write-scripts/postman-sandbox-api-reference/>
 [Accessed 13 September 2026].
+
+---
+
+# Part 3 — Production Deployment, Docker Compose & CI/CD
+
+## 1. Deployment Overview
+
+Part 3 extends the CoffeeNChill application with production containerisation, cloud deployment and automated build and test integration.
+
+The application was deployed to a Microsoft Azure Virtual Machine running Ubuntu 24.04. Docker Engine and Docker Compose were used to run the production services.
+
+## 2. Production Architecture
+
+The production deployment consists of three services:
+
+- **CoffeeNChill Gateway:** Handles API requests and exposes the application endpoints.
+- **CoffeeNChill Functions:** Processes the application's Azure Functions operations.
+- **Azurite:** Provides the Blob, Queue and Table storage emulator.
+
+The services communicate through a Docker network. Only the Gateway is exposed through the public application port. Functions and Azurite remain internal to the Docker environment.
+
+## 3. Docker Hub Images
+
+The application images were published to Docker Hub:
+
+| Image | Version |
+|---|---|
+| `st10450884/coffeenchill-gateway` | `v3.0` |
+| `st10450884/coffeenchill-functions` | `v2.0` |
+| `mcr.microsoft.com/azure-storage/azurite` | `latest` |
+
+## 4. Azure VPS Deployment
+
+The application was deployed to an Azure Virtual Machine using Ubuntu 24.04.
+
+Production deployment configuration is maintained in:
+
+- `docker-compose.prod.yml`
+- `.env.example`
+
+The actual `.env` file is stored privately on the VPS and is excluded from GitHub to protect sensitive configuration.
+
+The production application was accessible through:
+
+- Swagger documentation: `http://102.37.103.192:5000/swagger`
+- Health endpoint: `http://102.37.103.192:5000/health`
+
+The VM was deallocated after deployment testing to reduce ongoing compute costs.
+
+## 5. GitHub Actions CI/CD
+
+An automated workflow was created at:
+
+`.github/workflows/dotnet-ci.yml`
+
+The workflow performs the following operations:
+
+1. Checks out the GitHub repository.
+2. Sets up the .NET 10 SDK.
+3. Restores project dependencies.
+4. Builds the solution in Release configuration.
+5. Executes the automated tests.
+
+The workflow runs when code is pushed, when pull requests are created, and when manually triggered.
+
+The successful GitHub Actions execution was captured as submission evidence.
+
+## 6. Production API Verification
+
+The production deployment was checked using the following tests:
+
+| Test | Result |
+|---|---|
+| Menu smoke test | HTTP 200 |
+| Get all menu items | HTTP 200 |
+| Staff documents list | HTTP 401 — authentication required |
+| Public Swagger endpoint | Accessible |
+| Public health endpoint | Successful |
+
+The Staff Documents endpoint requires authentication. Its authenticated operation was not fully verified during this testing session.
+
+## 7. Deployment Documentation and Evidence
+
+Additional documentation and screenshots are available in the `docs` folder:
+
+- `Deployment-Guide.md` — production deployment instructions.
+- `Postman Collection.json` — imported API collection.
+- `github-actions-success.png` — successful CI/CD workflow.
+- `azure-swagger.png` — production Swagger documentation.
+- `azure-health-check.png` — production health-check evidence.
+
+## 8. Member 3 Contribution
+
+Member 3 was responsible for Docker Compose configuration, Docker Hub image publishing and versioning, Azure VPS deployment, GitHub Actions CI/CD integration, deployment documentation and production verification.
+
+## 9. Repository
+
+The completed project and supporting documentation are maintained
